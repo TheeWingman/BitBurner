@@ -1,12 +1,17 @@
 /** @param {NS} ns */
 export async function main(ns) {
+  ns.run("gui/process-list.js");
   ns.run("hashOV.js");
-  ns.run("SphyxOS/full/IPvGo.js");
+  ns.run("SphyxOS/full/IPvGo.js",1,"Netburners","Daedalus","The Black Hand","Illuminati");
   ns.run("wait2Break.js");
-  ns.run("hashSpend.js",1,"Sell for Money");
+  //ns.run("hashSpend.js", 1, "Sell for Money");
   await ns.sleep(1000);
-  //ns.run("Batchers/1Thread/Manager.js", 1, "foodnstuff", "noHS");
-  ns.run("SoRADeploy.js",1,"n00dles");
+  //if (ns.fileExists("BruteSSH.exe", "home") && ns.fileExists("FTPCrack.exe", "home")) {
+    ns.run("Batchers/1Thread/Manager.js", 1, "foodnstuff", "noHS");
+  /*}
+  else {
+    ns.run("SoRADeploy.js", 1, "foodnstuff", "killEnd");
+  }*/
   //ns.run("upHS.js");
   ns.run("purchase-server-16gb.js");
   /*let ctr = 0;

@@ -15,16 +15,14 @@ export async function main(ns) {
   for(const server of servers){
     const used = ns.getServerUsedRam(server);
     let max = ns.getServerMaxRam(server);
-    if(RegExp(/pserv-/).test(server)){
-      max = max / 2;
+    if(server.includes("pserv-") && ns.args.includes("noPserv")){
+      max = 0;
     }
-    if(RegExp(/hacknet/).test(server) && ns.args[0] == "noHS"){
+    if(server.includes("hacknet-") && ns.args.includes("noHS")){
       max = 0;
     }
     const free = max-used;
-    let argus = ns.args[1];
-    if(argus == null){ argus = 0;}
-    let thread = Math.max(Math.floor(free/rbRam), argus);
+    let thread = Math.floor(free/rbRam);
     /*ns.print(thread);
     thread = thread.toFixed(0);*/
     if((thread*rbRam) >= free){

@@ -1,5 +1,6 @@
 import * as calc from "calcBestSrv.js";
 import * as bstSrv from "bestHackSvr2.js";
+import * as util from "SphyxOS/util.js";
 
 export async function main(ns) {
   let bestServers = calc.default(ns);
@@ -14,29 +15,30 @@ export async function main(ns) {
     let threadWeak = 0;
     let threadGrow = 0;
     let threadHack = 0;
-    let hackScript = ns.getScriptRam("remoteHack.js","home");
-    let growScript = ns.getScriptRam("remoteGrow.js","home");
-    let weakScript = ns.getScriptRam("remoteWeak.js","home");
-    let hackT = ns.hackAnalyzeThreads(i.name,ns.getServerMaxMoney(i.name));
-    ns.tprint(growT);
-    ns.tprint(weakT);
+    let hackScript = await util.doGetScriptRam(ns, "remoteHack.js");
+    let growScript = await util.doGetScriptRam(ns, "remoteGrow.js");
+    let weakScript = await util.doGetScriptRam(ns,"remoteWeak.js");
+    let monMax = await util.doGetServerMaxMoney(ns, i.name);
+    let hackT = await util.proxy(ns, "hackAnalyzeThreads",i.name,monMax);
+    //ns.tprint(growT);
+    //ns.tprint(weakT);
     for(const server of servers){
-      let used = ns.getServerUsedRam(server);
-      let max = ns.getServerMaxRam(server);
+      let used = await util.proxy(ns, "getServerUsedRam", server);
+      let max = await util.proxy(ns,"getServerMaxRam",server);
       //totalThreads = totalThreads + (max/growScript);
       /*if(a == 0){
         ns.killall(server);
         await ns.sleep(1000);
       }*/
-      ns.tprint(`growT: ${growT}`);
+      /*ns.tprint(`growT: ${growT}`);
       ns.tprint(`weakT: ${weakT}`);
       ns.tprint(`threadWeak: ${threadWeak}`);
       ns.tprint(`threadGrow: ${threadGrow}`);
       //ns.tprint(`totalThreads; ${totalThreads}`);
-      ns.tprint("");
-      ns.scp("remoteHack.js",server,"home");
-      ns.scp("remoteWeak.js",server,"home");
-      ns.scp("remoteGrow.js",server,"home");
+      ns.tprint("");*/
+      await util.doSCP(ns,"remoteHack.js",server);
+      await util.doSCP(ns,"remoteWeak.js",server);
+      await util.doSCP(ns,"remoteGrow.js",server);
       
       if(used < (max-weakScript)){
         //Deploy max amt of weak threads until weakT is 0

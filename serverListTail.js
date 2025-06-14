@@ -1,4 +1,5 @@
 import { list_servers } from "bestHackSvr2.js";
+import * as util from "SphyxOS/util.js";
 
 export function scriptsRun(ns, server) {
   const pst = ns.ps(server);
@@ -38,7 +39,6 @@ export function scriptsRun(ns, server) {
 /** @param {NS} ns */
 export async function main(ns) {
   ns.ui.openTail();
-  ns.atExit(ns.ui.closeTail);
   ns.disableLog('ALL');
   const winSize = ns.ui.windowSize();
   ns.ui.resizeTail((winSize[0] - 250), (winSize[1] + 700));
@@ -47,9 +47,9 @@ export async function main(ns) {
   const serversGot = [];
   for (const server of servers) {
     if (!server.includes("hacknet")) {
-      serversGot.push(ns.getServer(server));
+      serversGot.push(await util.proxy(ns, "getServer", server));
     }
-    else { serversGot.push(ns.hacknet.getNodeStats(server.split("r-")[1])); }
+    else { serversGot.push(await util.proxy(ns, "hacknet.getNodeStats", server.split("r-")[1])); }
   }
   let scripts = ""
   let allData = "";
@@ -74,8 +74,4 @@ export async function main(ns) {
     }
   }
   ns.print(allData);
-  while (true) {
-    await ns.sleep(1000);
-  }
-
 }

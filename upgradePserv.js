@@ -4,10 +4,19 @@ export async function main(ns) {
   ns.ui.openTail();
   ns.atExit(ns.ui.closeTail);
   const pservs = ns.getPurchasedServers();
-  let upRAM = ns.args[0];
+  let upRAM = 0;
+  let maxUpRAM = 0;
+  if (ns.args.includes(",")) {
+    let upRAMArr = ns.args[0].split(",");
+    ns.tprint(upRAMArr);
+    let upRAMString = "";
+    for (const num of upRAMArr) { upRAMString += num; }
+    maxUpRAM = Number(upRAMString);
+  }
+  else { maxUpRAM = ns.args[0]; }
   let keepRunning = false;
   let noUp = false;
-  if (upRAM == undefined) {
+  if (maxUpRAM == undefined) {
     keepRunning = true;
     noUp = true;
   }
@@ -18,7 +27,10 @@ export async function main(ns) {
     for (const pserv of pservs) {
       let maxRam = ns.getServerMaxRam(pserv);
       if (noUp) {
-        upRAM = Math.min(Math.pow(2, (Math.log2(maxRam) + 1)), Math.pow(2,20));
+        upRAM = Math.min(Math.pow(2, (Math.log2(maxRam) + 1)), Math.pow(2, 20));
+      }
+      else {
+        upRAM = Math.min(Math.pow(2, (Math.log2(maxRam) + 1)), maxUpRAM);
       }
       let upCost = ns.getPurchasedServerUpgradeCost(pserv, upRAM);
       let plrMon = ns.getServerMoneyAvailable("home");
@@ -27,7 +39,7 @@ export async function main(ns) {
           upgraded.push(pserv);
         }
       }
-      if (plrMon > upCost && maxRam != upRAM) {
+      if (plrMon > upCost && maxRam < upRAM) {
         /*let pst = ns.ps(pserv);
         let currentArg = "";
         if(pst.length > 0){
@@ -47,7 +59,7 @@ export async function main(ns) {
         ns.print(pserv + " to " + ns.formatRam(upRAM) + " Cost: " + ns.formatNumber(upCost));
       }
       if (maxRam >= upRAM && !keepRunning) {
-        if(upgraded.findIndex(i => i == pserv) == -1){
+        if (upgraded.findIndex(i => i == pserv) == -1) {
           upgraded.push(pserv);
         }
       }
@@ -59,6 +71,6 @@ export async function main(ns) {
       runnin = false;
       ns.alert("Servers upgraded to desired Ram");
     }
-    await ns.sleep(1000);
+    await ns.sleep(10000);
   }
 }

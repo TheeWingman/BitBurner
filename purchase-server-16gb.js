@@ -2,6 +2,7 @@ import bestHack from "bestHackSvr2.js";
 
 /** @param {NS} ns */
 export async function main(ns) {
+    ns.atExit(() => ns.run("upgradePserv.js"));
 // How much RAM each purchased server will have. In this case, it'll
     // be 8GB.
     const ram = 16;

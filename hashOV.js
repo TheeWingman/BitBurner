@@ -27,6 +27,6 @@ export async function main(ns) {
   while(true){
 
     hashAmt.innerHTML = `${ns.formatNumber(ns.hacknet.numHashes())} / ${ns.formatNumber(ns.hacknet.hashCapacity())}`;
-    await ns.sleep(1000);
+    await ns.sleep(20);
   }
 }
