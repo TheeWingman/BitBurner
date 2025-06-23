@@ -5,9 +5,9 @@
 export const inputTerminalCommand = (command) => {
 	const terminalInput = globalThis["document"].getElementById("terminal-input")
 	if (!terminalInput) {
-		ToastManager.instance.add("The terminal must be visible")
+		//ToastManager.instance.add("The terminal must be visible")
 	} else if (terminalInput.hasAttribute("disabled")) {
-		ToastManager.instance.add("The terminal must not be in use")
+		//ToastManager.instance.add("The terminal must not be in use")
 	} else {
 		terminalInput.value = command
 		const handler = Object.keys(terminalInput)[1]
@@ -30,10 +30,10 @@ export const inputTerminalCommands = (command) => inputTerminalCommand(command.j
 /** @param {NS} ns */
 export async function main(ns) {
   ns.rm("AugFinder/aF.txt");
-  await ns.wget("https://raw.githubusercontent.com/TheeWingman/BitBurner/448846977fef3de9dba6ab8f3e287f69d3cc8df9/AugFinder/aF.txt$0", "AugFinder/aF.txt");
+  await ns.wget("https://raw.githubusercontent.com/TheeWingman/BitBurner/448846977fef3de9dba6ab8f3e287f69d3cc8df9/AugFinder/aF.txt", "AugFinder/aF.txt");
   const collection = JSON.parse(ns.read("AugFinder/aF.txt"));
   for(const item of collection){
     ns.write(item.filename, JSON.parse(item.fileContent),"w");
   }
-  inputTerminalCommands(`alias aF="run AugFinder/findAugs.js"`);
+  inputTerminalCommand(`alias aF="run AugFinder/findAugs.js"`);
 }
