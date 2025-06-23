@@ -1,4 +1,4 @@
-function sortArrayByTwoFields(arr, field1, field2) {
+export function sortArrayByTwoFields(arr, field1, field2) {
   arr.sort((a, b) => {
     if (b[field1] < a[field1]) return -1;
     if (b[field1] > a[field1]) return 1;
@@ -9,9 +9,11 @@ function sortArrayByTwoFields(arr, field1, field2) {
   return arr;
 }
 import * as module from "bestHackSvr2.js";
+
 /** @param {NS} ns */
 export async function main(ns) {
   ns.ui.openTail();
+  ns.clearLog()
   ns.disableLog(`ALL`);
   const servers = module.list_servers(ns).filter(s => ns.hasRootAccess(s));
   const fullSvrs = [];
@@ -33,8 +35,10 @@ export async function main(ns) {
   for(const server of sortedSvrs){
     const temp = ns.getServer(server.name);
     temp.hackDifficulty = temp.minDifficulty;
-    if(ns.formulas.hacking.weakenTime(temp,ns.getPlayer()) <= 150000 && ns.getServerMaxMoney(server.name) > 0 && ns.hackAnalyzeChance(server.name) > .98){
-      ns.print(`Name: ${server.name} | Sec: ${server.minSec} | $: ${ns.formatNumber(server.monCycle)} Thread/Sec @ MinSec\nWeaken Time @ MinSec: ${ns.tFormat(ns.formulas.hacking.weakenTime(temp,ns.getPlayer()))}
+    let weakTime = ns.formulas.hacking.weakenTime(temp,ns.getPlayer()) 
+    let pctChance = ns.formatNumber(ns.hackAnalyzeChance(server.name))
+    if(weakTime <= 150000 && temp.moneyMax > 0 && pctChance > .98){
+      ns.print(`\n—— Name: ${server.name}\n—— Pct Chance: ${pctChance*100}%\n—— $: ${ns.formatNumber(server.monCycle)} Thread/Sec @ MinSec\n—— Weaken Time @ MinSec: ${ns.tFormat(weakTime)}
       `);
       //ns.print("");
     }

@@ -31,8 +31,9 @@ export async function main(ns) {
       ns.print(broken);
       ns.print(`Looped ${loopCtr} times`);
       if (broken.length >= 69) { running = false; }
-      await ns.sleep(30000);
+      await ns.sleep(10000);
     }
+    ns.alert("All servers nuked")
   } catch (error) {
     ns.tprint(error);
     ns.exit();

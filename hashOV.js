@@ -8,10 +8,9 @@ export async function main(ns) {
   const hashStatic = doc.createElement('p');
   hashStatic.innerHTML = "Hash:";
   let hashAmt = doc.createElement('p');
-  if(slot0.hasChildNodes()){
-
-  slot0.removeChild(slot0Child1);
-  slot0.removeChild(slot0Child2);
+  if (slot0.hasChildNodes()) {
+    slot0.removeChild(slot0Child1);
+    slot0.removeChild(slot0Child2);
   }
   slot0Child1.appendChild(hashStatic);
   hashStatic.style.color = "red";
@@ -24,7 +23,12 @@ export async function main(ns) {
   hashAmt.style.textAlign = "right";
   slot0.appendChild(slot0Child1);
   slot0.appendChild(slot0Child2);
-  while(true){
+  ns.atExit(() => {
+    slot0.removeChild(slot0Child1);
+    slot0.removeChild(slot0Child2);
+  });
+
+  while (true) {
 
     hashAmt.innerHTML = `${ns.formatNumber(ns.hacknet.numHashes())} / ${ns.formatNumber(ns.hacknet.hashCapacity())}`;
     await ns.sleep(20);

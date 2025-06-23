@@ -6,7 +6,7 @@ export async function main(ns) {
   let hashMax = ns.hacknet.hashCapacity();
   let hash = ns.hacknet.numHashes();
   let upgrades = ns.hacknet.getHashUpgrades();
-  let upChoice = ns.args[0] != null ? ns.args[0] : "";
+  let upChoice = ns.args[0] != null ? ns.args[0].toString() : "";
   let alrdyRun = ns.ps("home").filter(s => s.filename == "hashSpend.js").length;
   //ns.tprint(alrdyRun);
 
@@ -65,7 +65,7 @@ export async function main(ns) {
         }
         else {
           while (upCost > hashMax) {
-            if (hash == hashMax - 4) {
+            if (hash == hashMax) {
               ns.hacknet.spendHashes("Sell for Money");
             }
             await ns.sleep(100);
@@ -76,9 +76,13 @@ export async function main(ns) {
         if (upCost <= hash) {
           ns.hacknet.spendHashes(upChoice, tgt);
         }
-      }
-      else {
-        upChoice = "Sell for Money";
+        else {
+          while (upCost > hashMax) {
+            if (hash == hashMax) {
+              ns.hacknet.spendHashes("Sell for Money")
+            }
+          }
+        }
       }
     }
     if (upChoice == "Company Favor") {
@@ -108,8 +112,12 @@ export async function main(ns) {
         if (hash >= upCost) {
           ns.hacknet.spendHashes(upChoice, company);
         }
-        else if (upCost > hashMax) {
-          ns.hacknet.spendHashes("Sell for Money");
+        else {
+          while (upCost > hashMax) {
+            if (hash == hashMax) {
+              ns.hacknet.spendHashes("Sell for Money");
+            }
+          }
         }
         await ns.sleep(10);
         ns.ui.renderTail();

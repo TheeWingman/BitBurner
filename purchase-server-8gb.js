@@ -5,7 +5,7 @@ export async function main(ns) {
     ns.atExit(() => ns.run("upgradePserv.js",1,4096));
 // How much RAM each purchased server will have. In this case, it'll
     // be 8GB.
-    const ram = 16;
+    const ram = 8;
 
     // Iterator we'll use for our loop
     let i = 0;

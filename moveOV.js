@@ -5,9 +5,9 @@
 
 export async function main(ns){
   await ns.sleep(100);
-  const doc = eval("document");
+  const doc = globalThis["document"];
   const ovBox = doc.querySelector('div.react-draggable');
-  ovBox.style.setProperty("transform",'translate(0px,950px)');
+  ovBox.style.setProperty("transform",'translate(0px,1050px)');
   //0px,1000px
   //ns.tprint(ovBox.style);
 }

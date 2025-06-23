@@ -1,8 +1,18 @@
 /** @param {NS} ns */
 export async function main(ns) {
+  //let doc = globalThis['document']
+  /*let ov = doc.querySelector('div.react-draggable')
+  let rightOfWin = Math.ceil(doc.querySelector('body').getBoundingClientRect().width)
+  let sideOfOv = Math.ceil(ov.getBoundingClientRect().width)
+  //ov.computedStyleMap().get("transform").toString().split(",").filter(a => a.includes("px")).at(0).split("(").at(1).slice(0, length-2)
+  /*let pt = ""
+  let widthOV = ov.attributes
+  for(const a of widthOV){pt +=`\n${a}`}
+  ns.tprint(pt)*/
+
   ns.disableLog('ALL');
   ns.ui.openTail();
-  ns.atExit(ns.ui.closeTail);
+  //ns.atExit(ns.ui.closeTail);
   const pservs = ns.getPurchasedServers();
   let upRAM = 0;
   let maxUpRAM = 0;
@@ -23,6 +33,11 @@ export async function main(ns) {
   let runnin = true;
   let upgraded = [];
   while (runnin) {
+    let doc = globalThis['document']
+    let rightOfWin = Math.ceil(doc.querySelector('body').getBoundingClientRect().width)
+    let sideOfOv = Math.ceil(doc.querySelector('div.react-draggable').getBoundingClientRect().width)
+    ns.ui.moveTail((rightOfWin - sideOfOv - 450), 1050)
+    ns.ui.resizeTail(450, 450)
     ns.clearLog();
     for (const pserv of pservs) {
       let maxRam = ns.getServerMaxRam(pserv);
@@ -69,8 +84,9 @@ export async function main(ns) {
     ns.print(upgraded);*/
     if (upgraded.length >= pservs.length) {
       runnin = false;
+      ns.ui.closeTail()
       ns.alert("Servers upgraded to desired Ram");
     }
-    await ns.sleep(10000);
+    await ns.sleep(5000);
   }
 }

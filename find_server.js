@@ -23,6 +23,7 @@ export async function main(ns) {
     const args = ns.flags([["help", false]]);
     let route = [];
     let server = args._[0];
+    
     if (!server || args.help) {
         ns.tprint("This script helps you find a server on the network and shows you the path to get to it.");
         ns.tprint(`Usage: run ${ns.getScriptName()} SERVER`);
