@@ -30,7 +30,7 @@ export const inputTerminalCommands = (command) => inputTerminalCommand(command.j
 /** @param {NS} ns */
 export async function main(ns) {
   ns.rm("AugFinder/aF.txt");
-  await ns.wget("https://raw.githubusercontent.com/TheeWingman/BitBurner/448846977fef3de9dba6ab8f3e287f69d3cc8df9/AugFinder/aF.txt", "AugFinder/aF.txt");
+  await ns.wget("https://raw.githubusercontent.com/TheeWingman/BitBurner/refs/heads/main/AugFinder/aF.txt", "AugFinder/aF.txt");
   const collection = JSON.parse(ns.read("AugFinder/aF.txt"));
   for(const item of collection){
     ns.write(item.filename, JSON.parse(item.fileContent),"w");
