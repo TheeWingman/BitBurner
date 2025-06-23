@@ -2,7 +2,7 @@ import * as mod from "SphyxOS/util.js";
 
 /** @param {NS} ns */
 export async function main(ns) {
-  //try {
+  try {
   let tgtSrv = ns.args[0];
   let hackSvr = ns.args[1];
 
@@ -19,43 +19,42 @@ export async function main(ns) {
     tgtSrv = "foodnstuff";
   }
   //--------------------------------------
-  const hackRam = await mod.doGetScriptRam(ns, "/Batchers/remoteHack.js");
-  const growRam = await mod.doGetScriptRam(ns, "/Batchers/remoteGrow.js");
-  const weakRam = await mod.doGetScriptRam(ns, "/Batchers/remoteWeak.js");
+  const hackRam = ns.getScriptRam("/Batchers/remoteHack.js");
+  const growRam = ns.getScriptRam("/Batchers/remoteGrow.js");
+  const weakRam = ns.getScriptRam("/Batchers/remoteWeak.js");
 
   let hackT = 0;
   let growT = 0;
   let weakTA = 0;
   let weakTB = 0;
   let possLoops = 0;
-  let maxRam = 0;
 
-  if (hackSvr.includes("hacknet")) {
-    let index = Number(hackSvr.split("r-")[1]);
-    //ns.tprint(`Node-${index}`);
-    maxRam = await mod.proxy(ns, "hacknet.getNodeStats", index).ram;
-    //ns.tprint(`Node-${index} has ${(maxRam)}`);
-  }
-  else { maxRam = await mod.getServerAvailRam(ns, hackSvr); }
-  let maxMoney = await mod.doGetServerMaxMoney(ns, tgtSrv);
-  let minSec = await mod.doGetServerMinSec(ns, tgtSrv);
-  let timeHack = await mod.getHckTimeBasic(ns, tgtSrv);
+  let maxRam = ns.getServerMaxRam(hackSvr);
+  //let minSec = ns.getServerMinSecurityLevel(tgtSrv);
+
+  let timeHack = ns.getHackTime(tgtSrv);
   let timeWeak = timeHack * 4;
   let timeGrow = timeHack * 3.2;
   let growWait = timeWeak - timeGrow;
   let hackWait = timeWeak - timeHack;
-  let hack1T = await mod.proxy(ns, "hackAnalyze", tgtSrv)
-  let afterHackMon = maxMoney - (maxMoney * hack1T);
-  //let srv = ns.getServer(tgtSrv);
-  //srv.moneyAvailable = afterHackMon
+
+  let tgt = ns.getServer(tgtSrv)
+  tgt.hackDifficulty = tgt.minDifficulty
+  let maxMoney = tgt.moneyMax
+  let plr = ns.getPlayer()
+
+  let hack1T = ns.formulas.hacking.hackPercent(tgt, plr)
+  let weakenStr = ns.weakenAnalyze(1)
+  let afterHackMon = maxMoney * (1-hack1T);
+  tgt.moneyAvailable = afterHackMon
 
   hackT = 1;
 
-  growT = await mod.getGrowThreads(ns, tgtSrv, afterHackMon, minSec);
+  growT = ns.formulas.hacking.growThreads(tgt,plr,tgt.moneyMax)
 
-  weakTA = Math.ceil(await mod.proxy(ns, "hackAnalyzeSecurity", hackT) / await mod.weakenStr(ns));
+  weakTA = Math.ceil(ns.hackAnalyzeSecurity(hackT) / weakenStr)
 
-  weakTB = Math.ceil(await mod.proxy(ns, "growthAnalyzeSecurity", growT) / await mod.weakenStr(ns));
+  weakTB = Math.ceil(ns.growthAnalyzeSecurity(growT) / weakenStr);
 
   possLoops = Math.floor(maxRam / ((growT * growRam) + (hackT * hackRam) + (weakTA * weakRam) + (weakTB * weakRam)));
 
@@ -77,12 +76,13 @@ export async function main(ns) {
     hackT *= possLoops;
 
     afterHackMon = maxMoney - (maxMoney * (hack1T * possLoops));
+    tgt.moneyAvailable = afterHackMon
 
-    growT = await mod.getGrowThreads(ns, tgtSrv, afterHackMon, await mod.proxy(ns, "getServerMinSecurityLevel", tgtSrv));
+    growT = ns.formulas.hacking.growThreads(tgt, plr, tgt.moneyMax)
 
-    weakTA = Math.ceil(await mod.proxy(ns, "hackAnalyzeSecurity", hackT) / await mod.weakenStr(ns));
+    weakTA = Math.ceil(ns.hackAnalyzeSecurity(hackT) / weakenStr);
 
-    weakTB = Math.ceil(await mod.proxy(ns, "growthAnalyzeSecurity", growT) / await mod.weakenStr(ns));
+    weakTB = Math.ceil(ns.growthAnalyzeSecurity(growT) / weakenStr)
 
     ns.print(`TOTALS:
     PossLoops: ${possLoops}
@@ -96,15 +96,16 @@ export async function main(ns) {
     ns.print(`Hack: ${timeHack}`)
     ns.print(`growWait: ${growWait}`)
     ns.print(`hackWait: ${hackWait}`)*/ 
-
+    ns.writePort(ns.pid, hackT)
     ns.exec("/Batchers/remoteHack.js", hackSvr, hackT, tgtSrv, hackWait);
     ns.exec("/Batchers/remoteWeak.js", hackSvr, weakTA, tgtSrv);
     ns.exec("/Batchers/remoteGrow.js", hackSvr, growT, tgtSrv, growWait);
     ns.exec("/Batchers/remoteWeak.js", hackSvr, weakTB, tgtSrv);
   }
   //--------------------------------------
-  /*} catch (error) {
+  } catch (error) {
     ns.print(error);
     ns.ui.openTail();
-  }*/
+    ns.exit()
+  }
 }
