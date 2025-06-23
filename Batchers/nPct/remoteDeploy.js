@@ -5,7 +5,8 @@ export async function main(ns) {
   try {
     let pctHack = ns.args[0];
     let tgtSrv = ns.args[1];
-    let hackSvr = ns.args[2];
+    let hackSvr = ns.args[2]
+    let maxLoops = ns.args[3] != null ? ns.args[3] : 50
 
     ns.disableLog('ALL');
     /*if (hackSvr == "pserv-24") {
@@ -15,6 +16,7 @@ export async function main(ns) {
     ns.print(pctHack);
     ns.print(tgtSrv);
     ns.print(hackSvr);
+    ns.print(maxLoops)
 
     if (tgtSrv == null) {
       tgtSrv = "joesguns";
@@ -23,26 +25,23 @@ export async function main(ns) {
       hackSvr = "pserv-0";
     }
     //--------------------------------------
-    const hackRam = await mod.doGetScriptRam(ns,"/Batchers/remoteHack.js");
-    const growRam = await mod.doGetScriptRam(ns,"/Batchers/remoteGrow.js");
-    const weakRam = await mod.doGetScriptRam(ns,"/Batchers/remoteWeak.js");
+    const hackRam = ns.getScriptRam("/Batchers/remoteHack.js");
+    const growRam = ns.getScriptRam("/Batchers/remoteGrow.js");
+    const weakRam = ns.getScriptRam("/Batchers/remoteWeak.js");
 
     let hackT = 0;
     let growT = 0;
     let weakTA = 0;
     let weakTB = 0;
+    let ttlThreads = 0
     let possLoops = 0;
     let maxRam = 0;
-    if (hackSvr.includes("hacknet")) {
-      let index = Number(hackSvr.split("r-")[1]);
-      //ns.tprint(`Node-${index}`);
-      maxRam = await mod.proxy(ns,"hacknet.getNodeStats",index).ram;
-      //ns.tprint(`Node-${index} has ${(maxRam)}`);
-    }
-    else { maxRam = await mod.proxy(ns,"getServerMaxRam",hackSvr); }
+    maxRam = ns.getServerMaxRam(hackSvr);
     //ns.print(maxRam);
-    let maxMoney = await mod.doGetServerMaxMoney(ns,tgtSrv);
-    let timeHack = await mod.getHckTimeBasic(ns, tgtSrv);
+    let tgt = ns.getServer(tgtSrv)
+    let plr = ns.getPlayer()
+    let maxMoney = tgt.moneyMax;
+    let timeHack = ns.getHackTime(tgtSrv);
     //ns.print(maxMoney);
     //ns.print(timeHack);
     let timeWeak = timeHack * 4;
@@ -50,21 +49,21 @@ export async function main(ns) {
     let growWait = timeWeak - timeGrow;
     let hackWait = timeWeak - timeHack;
     let hackAmt = maxMoney * (pctHack/100);
-    let currMon = maxMoney - hackAmt;
+    tgt.moneyAvailable = maxMoney - hackAmt;
 
-    growT = await mod.getGrowThreads(ns, tgtSrv, currMon, await mod.proxy(ns, "getServerMinSecurityLevel", tgtSrv));
+    growT = ns.formulas.hacking.growThreads(tgt, plr, maxMoney);
     //Math.ceil(ns.growthAnalyze(tgtSrv, (maxMoney/ (maxMoney*(1-((pctHack+.05)/100))))));
     //ns.print(growT);
 
-    hackT = Math.floor(await mod.proxy(ns,"hackAnalyzeThreads",tgtSrv, hackAmt));
+    hackT = Math.floor(ns.hackAnalyzeThreads(tgtSrv, hackAmt));
     //ns.print(hackT);
 
-    let weakStr = await mod.weakenStr(ns);
+    let weakStr = ns.weakenAnalyze(1);
 
-    weakTA = Math.ceil(await mod.proxy(ns,"hackAnalyzeSecurity",hackT) / weakStr);
+    weakTA = Math.ceil(ns.hackAnalyzeSecurity(hackT) / weakStr);
     //ns.print(weakTA)
 
-    weakTB = Math.ceil(await mod.proxy(ns,"growthAnalyzeSecurity",growT) / weakStr);
+    weakTB = Math.ceil(ns.growthAnalyzeSecurity(growT) / weakStr);
     //ns.print(weakTB);
 
     possLoops = Math.floor(maxRam / ((growT * growRam) + (hackT * hackRam) + (weakTA * weakRam) + (weakTB * weakRam)));
@@ -78,7 +77,9 @@ export async function main(ns) {
     Ram Needed: ${ns.formatRam(((growT*growRam)+(hackRam*hackT)+(weakRam*weakTA)+(weakRam*weakTB)))}`);
 
     if (possLoops > 0) {
-      if (possLoops > 50) { possLoops = 50; }
+      if (possLoops > maxLoops) { possLoops = maxLoops; }
+      ttlThreads = possLoops * (hackT + growT + weakTA + weakTB)
+      ns.writePort(ns.pid, [possLoops,ttlThreads])
       while (possLoops > 0) {
         ns.exec("/Batchers/remoteHack.js", hackSvr, hackT, tgtSrv, hackWait);
         ns.exec("/Batchers/remoteWeak.js", hackSvr, weakTA, tgtSrv);
@@ -89,6 +90,7 @@ export async function main(ns) {
     }
     //--------------------------------------
   } catch (error) {
-    ns.tprint(error);
+    ns.print(`${ns.args[2]}\n${error}\n\n`);
+    ns.exit()
   }
 }
