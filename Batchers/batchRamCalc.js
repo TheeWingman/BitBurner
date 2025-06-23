@@ -1,9 +1,10 @@
+import * as mod from "SphyxOS/util.js"
 /** @param {NS} ns */
 export async function main(ns) {
   ns.clearLog();
   ns.ui.openTail();
   ns.disableLog('ALL');
-  const tgtSrv = ns.args[0];
+  const tgtSrv = ns.args[0] != null ? ns.args[0] : "foodnstuff"
   const hackRam = ns.getScriptRam("Batchers/remoteHack.js","home");
   const growRam = ns.getScriptRam("Batchers/remoteGrow.js","home");
   const weakRam = ns.getScriptRam("Batchers/remoteWeak.js","home");
@@ -15,13 +16,21 @@ export async function main(ns) {
   let nthPct = 0;
   let nthPctInv = 0;
 
-  let maxMoney = ns.getServerMaxMoney(tgtSrv);
+  let tgt = ns.getServer(tgtSrv)
+  let maxMoney = tgt.moneyMax;
+  let plr = ns.getPlayer()
+  tgt.hackDifficulty = tgt.minDifficulty
+  
+  
   ns.print(`For ${tgtSrv}:`);
   //  10 PERCENT BATCH
-  for(let i=1; i<=10; i++){
-    nthPct = i*.01;
-    nthPctInv = 1 - (i*.01);
-  growT = Math.ceil(ns.growthAnalyze(tgtSrv, (maxMoney / (maxMoney * nthPctInv))));
+  for(let i=1; i<=20; i++){
+    nthPct = i/100;
+    nthPctInv = 1 - (i/100);
+
+    tgt.moneyAvailable = maxMoney * nthPctInv
+  growT = ns.formulas.hacking.growThreads(tgt, plr, maxMoney)
+  //growthAnalyze(tgtSrv, (maxMoney / (maxMoney * nthPctInv))));
 
   hackT = Math.ceil(ns.hackAnalyzeThreads(tgtSrv, (maxMoney * nthPct)));
 
@@ -29,7 +38,7 @@ export async function main(ns) {
 
   weakTB = Math.max(Math.ceil(ns.growthAnalyzeSecurity(growT) / ns.weakenAnalyze(1)), 1);
 
-  ramUse = Math.ceil((growT*growRam)+(hackRam*hackT)+(weakRam*weakTA)+(weakRam*weakTB));
+  ramUse = (growT*growRam)+(hackRam*hackT)+(weakRam*weakTA)+(weakRam*weakTB);
 
   ns.print(`For 1 Loop of ${i}Pct:
         L hackT:  ${hackT}
@@ -39,8 +48,11 @@ export async function main(ns) {
           Ram Needed: ${ns.formatRam(ramUse)}`);
   }
   //  1 THREAD BATCH
+  let hack1T = ns.formulas.hacking.hackPercent(tgt, plr)
 
-  growT = Math.ceil(ns.growthAnalyze(tgtSrv, (maxMoney / (maxMoney - (ns.hackAnalyze(tgtSrv) * maxMoney))))) + 1;
+  tgt.moneyAvailable = maxMoney * (1-hack1T)
+
+  growT = ns.formulas.hacking.growThreads(tgt, plr, maxMoney);
 
   hackT = 1;
 
